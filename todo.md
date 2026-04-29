@@ -3,6 +3,9 @@
 **CRITICAL INSTRUCTION FOR AI AGENT:** 
 You must implement this project strictly phase by phase. **DO NOT** proceed to the next phase until the user explicitly tells you to do so. After completing the tasks in a phase, you must output the exact phrase: `🛑 STOPPING HERE FOR HUMAN TESTING AND GITHUB PUSH.` and wait for the user's next prompt.
 
+## Meta / Documentation
+- [x] Document implementation approach, trade-offs, and current progress in `development.md`.
+
 ## Phase 1: Foundation & Authentication
 - [x] Initialize Next.js app with Tailwind CSS and Shadcn UI.
 - [x] Set up Supabase SSR client utilities (`createBrowserClient`, `createServerClient`).
@@ -29,11 +32,13 @@ You must implement this project strictly phase by phase. **DO NOT** proceed to t
 > **🛑 STOPPING HERE FOR HUMAN TESTING AND GITHUB PUSH.**
 
 ## Phase 4: Data Persistence
-- [ ] Define a Supabase database schema for `projects` (id, user_id, code_content, created_at).
-- [ ] Implement a "Save Project" function that writes the current Sandpack code state and chat history to Supabase.
-- [ ] Create a "My Projects" sidebar or dashboard where users can fetch and load their previously saved Sandpack states.
-- [ ] Redesign `/workspace` layout into three areas: session history list, active chat panel, and preview panel.
-- [ ] Add preview mode toggle buttons: **Code Editor** (shows AI-generated code) and **Live Preview** (interactive app preview).
+- [x] Define a Supabase database schema for `projects` (id, user_id, code_content, created_at).
+- [x] Implement a "Save Project" function that writes the current Sandpack code state and chat history to Supabase.
+- [x] Create a "My Projects" sidebar or dashboard where users can fetch and load their previously saved Sandpack states.
+- [x] Redesign `/workspace` layout into three areas: session history list, active chat panel, and preview panel.
+- [x] Add preview mode toggle buttons: **Code Editor** (shows AI-generated code) and **Live Preview** (interactive app preview).
+- [x] Follow-up: define RLS policies for `projects` (owner-only read/write) before wiring UI.
+- [x] Follow-up: confirm data model for chat history (single JSON column vs. normalized table).
 > **🛑 STOPPING HERE FOR HUMAN TESTING AND GITHUB PUSH.**
 
 ## Phase 5: Advanced Feature - Multi-Agent Visualization

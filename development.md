@@ -43,3 +43,38 @@
 * For Vercel deployments, set environment variables in the Vercel dashboard.
 * AI API keys are only required starting in Phase 3.
 * For OpenAI-compatible providers, add `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and `OPENAI_MODEL`.
+
+## Implementation Approach & Key Trade-offs
+### Why this stack
+* **Next.js + Vercel:** tight integration with Route Handlers and streaming responses, fast deploy iterations, and an App Router architecture that matches the project’s server/client split.
+* **Supabase:** managed Postgres with Auth + RLS baked in, minimizing custom backend code while keeping ownership of data models.
+* **Kimi (OpenAI-compatible):** cost-effective, fast response times, and easy drop-in via `OPENAI_BASE_URL` + model overrides using the Vercel AI SDK.
+* **Sandpack:** reliable in-browser code execution with a familiar React-file model for live previews.
+
+### Design decisions
+* **Server-only AI calls:** enforced via Route Handlers to avoid key leakage and CORS issues.
+* **State-driven Sandpack:** generated code is stored as raw strings in React state and passed through `files` for deterministic rendering.
+* **SSR CSS injection:** prevents Sandpack layout shifts while preserving Next.js streaming behavior.
+* **Proxy-based auth guard:** keeps `/workspace` protection centralized and consistent across routes.
+
+### Trade-offs & compromises
+* **Vercel lock-in vs. speed:** optimized for Vercel’s hosting model; portability is lower but iteration speed is higher.
+* **Supabase convenience vs. flexibility:** simplifies auth + storage at the expense of deeper control over auth flows.
+* **Strict code-only AI output:** reduces hallucinated prose, but can be brittle when the model needs to explain changes.
+* **Sandpack performance:** great for quick demos but heavier than a custom preview pipeline for large codebases.
+
+## Current Progress & Completion Status
+### Implemented
+* **Auth flow:** sign-up/login pages, Supabase SSR clients, protected `/workspace` routing.
+* **Workspace UI:** split-pane layout, Sandpack SSR CSS injection, live preview wiring.
+* **AI streaming:** `/api/chat` route with `streamText`, `useChat` integration, and Sandpack file updates.
+* **Env setup guidance:** README notes for Supabase + Vercel configuration.
+
+### Pending (Phase 4)
+* **Data persistence:** define `projects` schema (id, user_id, code_content, created_at) with RLS.
+* **Save/load flow:** persist Sandpack state + chat history, and list saved projects.
+* **Workspace layout:** shift to 3-pane (history, chat, preview) with preview mode toggles.
+
+### Known issues / risks
+* **Deployment config drift:** Vercel envs and Supabase Auth URLs must stay in sync to avoid `access_denied` or `otp_expired`.
+* **RLS gaps:** Phase 4 requires careful policy setup to prevent cross-user access.
