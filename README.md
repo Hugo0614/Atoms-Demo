@@ -15,14 +15,25 @@ This is a Next.js (App Router) demo inspired by Atoms.dev. Phase 1 delivers the 
 - SSR CSS injection for Sandpack to avoid layout flashes.
 - Static chat prompt UI ready for Phase 3 AI wiring.
 
+## ✅ Features in Phase 3
+
+- `/api/chat` route streams AI output via the Vercel AI SDK.
+- Chat UI is wired to `useChat` and streams messages into the UI.
+- Sandpack preview updates live with the generated React code.
+
 ## Environment Variables
 
 Create a `.env.local` file using the template below:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+OPENAI_API_KEY=your-provider-key
+OPENAI_BASE_URL=https://api.moonshot.cn/v1
+OPENAI_MODEL=moonshot-v1-8k
+# Optional allowlist for multi-model switching
+# OPENAI_MODELS=moonshot-v1-8k,moonshot-v1-32k
 ```
 
 > **Important:** Supabase email auth requires a real, reachable email address.
@@ -42,12 +53,17 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ### 2) Vercel Environment Variables
 Set these in Vercel → Project → Settings → Environment Variables:
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` (or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`)
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SITE_URL` (your live domain)
 
 ### 3) AI API Keys (Phase 3)
-Phase 3 will require an AI provider key. Add one when you reach that phase:
-- `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
+Phase 3 requires an AI provider key. This project uses OpenAI-compatible APIs
+(e.g., Kimi/Moonshot) via the OpenAI SDK:
+
+- `OPENAI_API_KEY`
+- `OPENAI_BASE_URL` (e.g. `https://api.moonshot.cn/v1`)
+- `OPENAI_MODEL` (e.g. `moonshot-v1-8k`)
+- Optional: `OPENAI_MODELS` (comma-separated allowlist)
 
 ## Development
 
