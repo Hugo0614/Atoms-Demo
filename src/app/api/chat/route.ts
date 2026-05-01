@@ -2,7 +2,7 @@ import { convertToModelMessages, streamText } from "ai";
 import type { UIMessage } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 
-const systemPrompt = `You are an expert React UI builder.\n\nRules:\n- Respond with exactly one fenced code block containing the full contents of /App.js.\n- The code must be valid React (JavaScript) and export a default component.\n- Do not include any explanations, markdown outside the code fence, or extra files.\n- Prefer Tailwind CSS classes for styling when possible.`;
+const systemPrompt = `You are an expert React UI builder.\n\nRules:\n- First provide a brief explanation of the design decisions (2-4 sentences).\n- Then provide one or more fenced code blocks.\n- Each code block MUST start with a filename after the backticks, for example: \`\`\`/App.js\n...\n\`\`\`.\n- Only include files needed for the UI (e.g. /App.js, /App.css).\n- The /App.js code must be valid React (JavaScript) and export a default component.\n- Do not include any additional markdown outside the explanation and code fences.\n- Prefer Tailwind CSS classes for styling when possible.`;
 
 export async function POST(req: Request) {
   const { messages, model } = await req.json();

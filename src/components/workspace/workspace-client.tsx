@@ -31,21 +31,37 @@ type ProjectRecord = {
   created_at: string;
 };
 
-function extractLatestCode(content: string) {
-  const codeBlockRegex = /```(?:tsx|jsx|ts|js)?\n([\s\S]*?)```/g;
-  const blocks: string[] = [];
+const starterFiles: SandpackFiles = {
+  "/App.js": {
+    code: starterCode,
+  },
+};
+
+function normalizeFilename(value: string | undefined) {
+  if (!value) {
+    return "/App.js";
+  }
+
+  const trimmed = value.trim();
+  if (trimmed.startsWith("/")) {
+    return trimmed;
+  }
+
+  return `/${trimmed}`;
+}
+
+function extractFilesFromText(content: string) {
+  const codeBlockRegex = /```([^\n]*)\n([\s\S]*?)```/g;
+  const files: SandpackFiles = {};
   let match = codeBlockRegex.exec(content);
 
   while (match) {
-    blocks.push(match[1].trim());
+    const filename = normalizeFilename(match[1]);
+    files[filename] = { code: match[2].trim() };
     match = codeBlockRegex.exec(content);
   }
 
-  if (blocks.length > 0) {
-    return blocks[blocks.length - 1];
-  }
-
-  return content.trim();
+  return Object.keys(files).length > 0 ? files : null;
 }
 
 function getMessageText(message: UIMessage) {
@@ -57,6 +73,27 @@ function getMessageText(message: UIMessage) {
     .filter((part) => part.type === "text")
     .map((part) => part.text)
     .join("");
+}
+
+function stripCodeBlocks(content: string) {
+  return content.replace(/```[\s\S]*?```/g, "").trim();
+}
+
+function parseStoredFiles(raw: string) {
+  try {
+    const parsed = JSON.parse(raw) as SandpackFiles;
+    if (parsed && typeof parsed === "object") {
+      return parsed;
+    }
+  } catch {
+    // Fallback to plain code.
+  }
+
+  return { "/App.js": { code: raw } };
+}
+
+function serializeFiles(files: SandpackFiles) {
+  return JSON.stringify(files);
 }
 
 function ensureMessageIds(messages: UIMessage[]) {
@@ -91,7 +128,9 @@ function formatTimestamp(value: string) {
 }
 
 export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClientProps) {
-  const [overrideCode, setOverrideCode] = React.useState<string | null>(null);
+  const [overrideFiles, setOverrideFiles] = React.useState<SandpackFiles | null>(
+    null,
+  );
   const [previewMode, setPreviewMode] =
     React.useState<SandpackPreviewMode>("preview");
   const [projects, setProjects] = React.useState<ProjectRecord[]>([]);
@@ -148,7 +187,7 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
     void loadProjects();
   }, [loadProjects]);
 
-  const latestAssistantCode = React.useMemo(() => {
+  const latestAssistantFiles = React.useMemo(() => {
     const latestAssistant = [...messages]
       .reverse()
       .find((message) => message.role === "assistant");
@@ -159,29 +198,21 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
       return null;
     }
 
-    const nextCode = extractLatestCode(assistantText);
-    return nextCode || null;
+    return extractFilesFromText(assistantText);
   }, [messages]);
 
+
   const files = React.useMemo<SandpackFiles>(() => {
-    const code = overrideCode ?? latestAssistantCode ?? starterCode;
-
-    return {
-      "/App.js": {
-        code,
-      },
-    };
-  }, [overrideCode, latestAssistantCode]);
-
-  const currentCode = overrideCode ?? latestAssistantCode ?? starterCode;
+    return overrideFiles ?? latestAssistantFiles ?? starterFiles;
+  }, [overrideFiles, latestAssistantFiles]);
 
   const handleReset = () => {
-    setOverrideCode(starterCode);
+    setOverrideFiles(starterFiles);
   };
 
   const handleNewSession = () => {
     setSelectedProjectId(null);
-    setOverrideCode(starterCode);
+    setOverrideFiles(starterFiles);
     setMessages([]);
     setInput("");
   };
@@ -203,7 +234,7 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
 
     const payload = {
       user_id: user.id,
-      code_content: currentCode,
+      code_content: serializeFiles(files),
       chat_history: messages,
     };
 
@@ -242,7 +273,7 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
       : [];
 
     setSelectedProjectId(project.id);
-    setOverrideCode(project.code_content);
+    setOverrideFiles(parseStoredFiles(project.code_content));
     setMessages(history);
     setInput("");
   };
@@ -256,13 +287,13 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
       return;
     }
 
-    setOverrideCode(null);
+    setOverrideFiles(null);
     await sendMessage({ text: input.trim() });
     setInput("");
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+  <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
           <div>
@@ -276,7 +307,7 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
           </form>
         </div>
       </header>
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-6">
+  <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-6">
         <div>
           <h1 className="text-3xl font-semibold">Workspace</h1>
           <p className="text-muted-foreground">
@@ -284,9 +315,9 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
             builds it.
           </p>
         </div>
-        <div className="grid flex-1 gap-6 lg:grid-cols-[minmax(220px,280px)_minmax(320px,420px)_1fr]">
+        <div className="grid flex-1 gap-6 lg:grid-cols-[minmax(180px,220px)_minmax(280px,360px)_1fr]">
           <section className="flex flex-col gap-4">
-            <Card className="flex-1">
+            <Card className="flex flex-1 flex-col">
               <CardHeader>
                 <CardTitle>My Projects</CardTitle>
                 <CardDescription>
@@ -343,7 +374,7 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
             </Card>
           </section>
           <section className="flex flex-col gap-4">
-            <Card className="flex-1">
+            <Card className="flex flex-1 flex-col">
               <CardHeader className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
@@ -373,36 +404,40 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
                     pricing section with three tiers.”
                   </div>
                 ) : (
-                  messages.map((message: UIMessage) => (
-                    <div
-                      key={message.id}
-                      className={
-                        message.role === "user"
-                          ? "rounded-xl bg-muted/40 p-4"
-                          : "rounded-xl border border-muted/40 bg-background p-4"
-                      }
-                    >
-                      <p className="text-xs uppercase text-muted-foreground">
-                        {message.role}
-                      </p>
-                      <pre className="mt-2 whitespace-pre-wrap text-sm text-foreground">
-                        {getMessageText(message)}
-                      </pre>
-                    </div>
-                  ))
+                  messages.map((message: UIMessage) => {
+                    const rawText = getMessageText(message);
+                    const displayText =
+                      message.role === "assistant"
+                        ? stripCodeBlocks(rawText)
+                        : rawText;
+
+                    if (!displayText.trim()) {
+                      return null;
+                    }
+
+                    return (
+                      <div
+                        key={message.id}
+                        className={
+                          message.role === "user"
+                            ? "rounded-xl bg-muted/40 p-4"
+                            : "rounded-xl border border-muted/40 bg-background p-4"
+                        }
+                      >
+                        <p className="text-xs uppercase text-muted-foreground">
+                          {message.role}
+                        </p>
+                        <pre className="mt-2 whitespace-pre-wrap text-sm text-foreground">
+                          {displayText}
+                        </pre>
+                      </div>
+                    );
+                  })
                 )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Prompt</CardTitle>
-                <CardDescription>Send a request to the AI builder.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
                 <form className="space-y-3" onSubmit={handleChatSubmit}>
                   <textarea
                     className="min-h-[120px] w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    placeholder="e.g. Build a hero section with a CTA button"
+                    placeholder="Type your prompt here..."
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
                   />
@@ -418,7 +453,7 @@ export default function WorkspaceClient({ userEmail, onSignOut }: WorkspaceClien
               </CardContent>
             </Card>
           </section>
-          <section className="flex min-h-[520px] flex-col gap-3">
+          <section className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm text-muted-foreground">Preview mode</p>

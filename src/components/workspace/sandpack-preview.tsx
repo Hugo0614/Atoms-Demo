@@ -29,14 +29,18 @@ type SandpackPreviewProps = {
 export default function SandpackPreview({ files, mode }: SandpackPreviewProps) {
   return (
     <div className="h-full w-full overflow-hidden rounded-2xl border bg-card shadow-sm">
-      <SandpackProvider template="react" files={files}>
+      <SandpackProvider
+        template="react"
+        files={files}
+        options={{
+          bundlerURL:
+            process.env.NEXT_PUBLIC_SANDBPACK_BUNDLER_URL ??
+            "https://sandpack-bundler.codesandbox.io",
+        }}
+      >
         <SandpackLayout className="h-full">
           {mode === "code" ? (
-            <SandpackCodeEditor
-              className="h-full"
-              showLineNumbers
-              wrapContent
-            />
+            <SandpackCodeEditor className="h-full" showLineNumbers wrapContent />
           ) : (
             <SandpackLivePreview className="h-full" />
           )}
