@@ -66,15 +66,20 @@
 ## Current Progress & Completion Status
 ### Implemented
 * **Auth flow:** sign-up/login pages, Supabase SSR clients, protected `/workspace` routing.
-* **Workspace UI:** split-pane layout, Sandpack SSR CSS injection, live preview wiring.
-* **AI streaming:** `/api/chat` route with `streamText`, `useChat` integration, and Sandpack file updates.
+* **Workspace UI:** 3-pane layout (projects / chat / sandbox), Sandpack SSR CSS injection, live preview wiring.
+* **AI streaming:** `/api/chat` route with `streamText`, `useChat` integration, and Sandpack file updates (code extracted from AI output).
 * **Env setup guidance:** README notes for Supabase + Vercel configuration.
+* **Persistence:** Supabase `projects` schema + RLS, save/load chat history + code state.
+* **Sandbox controls:** preview mode toggle, reset preview, file tabs (closable).
 
-### Pending (Phase 4)
-* **Data persistence:** define `projects` schema (id, user_id, code_content, created_at) with RLS.
-* **Save/load flow:** persist Sandpack state + chat history, and list saved projects.
-* **Workspace layout:** shift to 3-pane (history, chat, preview) with preview mode toggles.
+### Pending (Phase 5+)
+* **Multi-agent visualization:** React Flow node graph with planner/coder/reviewer states.
+* **Preset templates:** quick-start prompts/modules for common app types.
+* **Sandbox polish:** VSCode-grade file operations (rename/create/delete), multi-file scaffolds.
+* **Preview robustness:** improved runtime fallback when Sandpack bundler is unreachable.
+* **Quality UX:** better loading states, error surfaces, and preview console output.
 
 ### Known issues / risks
 * **Deployment config drift:** Vercel envs and Supabase Auth URLs must stay in sync to avoid `access_denied` or `otp_expired`.
-* **RLS gaps:** Phase 4 requires careful policy setup to prevent cross-user access.
+* **Sandpack runtime limits:** preview can fail if the external bundler is blocked by network policies.
+* **Experience gap vs Atoms:** missing preset modules, multi-agent transparency, and richer code editor tooling.

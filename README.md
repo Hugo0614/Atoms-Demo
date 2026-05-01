@@ -1,25 +1,22 @@
 # Atoms AI Workspace Demo
 
-This is a Next.js (App Router) demo inspired by Atoms.dev. Phase 1 delivers the authentication foundation with Supabase and shadcn UI.
+This is a Next.js (App Router) demo inspired by Atoms.dev. It focuses on a Supabase-authenticated workspace that streams AI-generated UI code into a live sandbox.
 
-## ✅ Features in Phase 1
+## ✅ Achieved Features
 
 - Supabase email/password sign up + log in.
 - Protected `/workspace` route via Next.js Proxy (`proxy.ts`).
-- Minimal shadcn-based UI for auth flows.
+- 3-pane workspace (projects list, chat panel, sandbox preview).
+- AI streaming via `/api/chat` and `useChat`, with code extraction to Sandpack files.
+- Save/load projects (Supabase `projects` table + RLS).
+- Sandbox controls: preview toggle + reset preview + closable file tabs.
 
-## ✅ Features in Phase 2
-
-- Split-pane workspace layout with chat + live preview.
-- Sandpack preview wired with a basic React “Hello World” starter.
-- SSR CSS injection for Sandpack to avoid layout flashes.
-- Static chat prompt UI ready for Phase 3 AI wiring.
-
-## ✅ Features in Phase 3
-
-- `/api/chat` route streams AI output via the Vercel AI SDK.
-- Chat UI is wired to `useChat` and streams messages into the UI.
-- Sandpack preview updates live with the generated React code.
+## ⚠️ Not Yet Implemented (vs Atoms.dev)
+- Multi-agent visualization (Planner / Coder / Reviewer state graph).
+- Rich preset templates/modules for instant project bootstrapping.
+- VSCode-level editor tooling (create/rename/delete files, advanced tabs, diagnostics).
+- Stronger preview reliability when Sandpack bundler is blocked by network policies.
+- More polished empty states, loading UX, and error surfaces.
 
 ## Environment Variables
 
@@ -106,4 +103,4 @@ deployed app.
 
 ## Next Phases
 
-The upcoming phases will add the live coding workspace, AI orchestration, persistence, and multi-agent visualization.
+The upcoming phases will add multi-agent visualization, preset templates, and deeper editor/preview tooling.
