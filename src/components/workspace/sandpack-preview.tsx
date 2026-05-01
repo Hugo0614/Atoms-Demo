@@ -2,6 +2,7 @@
 
 import {
   SandpackCodeEditor,
+  SandpackFileExplorer,
   SandpackLayout,
   SandpackPreview as SandpackLivePreview,
   SandpackProvider,
@@ -28,21 +29,33 @@ type SandpackPreviewProps = {
 
 export default function SandpackPreview({ files, mode }: SandpackPreviewProps) {
   return (
-    <div className="h-full w-full overflow-hidden rounded-2xl border bg-card shadow-sm">
+    <div className="h-full w-full overflow-hidden rounded-2xl border bg-muted/20">
       <SandpackProvider
         template="react"
         files={files}
-        options={{
-          bundlerURL:
-            process.env.NEXT_PUBLIC_SANDBPACK_BUNDLER_URL ??
-            "https://sandpack-bundler.codesandbox.io",
-        }}
       >
         <SandpackLayout className="h-full">
           {mode === "code" ? (
-            <SandpackCodeEditor className="h-full" showLineNumbers wrapContent />
+            <div className="flex h-full w-full bg-background">
+              <div className="w-48 border-r bg-muted/40">
+                <div className="border-b px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+                  Explorer
+                </div>
+                <SandpackFileExplorer className="h-full" />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <div className="border-b px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+                  Editor
+                </div>
+                <SandpackCodeEditor
+                  className="h-full min-w-0 flex-1 [&_.cm-scroller]:overflow-auto [&_.cm-content]:min-w-max"
+                  showLineNumbers
+                  wrapContent={false}
+                />
+              </div>
+            </div>
           ) : (
-            <SandpackLivePreview className="h-full" />
+            <SandpackLivePreview className="h-full bg-background" />
           )}
         </SandpackLayout>
       </SandpackProvider>
