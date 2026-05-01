@@ -3,6 +3,7 @@
 import {
   SandpackCodeEditor,
   SandpackFileExplorer,
+  FileTabs,
   SandpackLayout,
   SandpackPreview as SandpackLivePreview,
   SandpackProvider,
@@ -47,6 +48,7 @@ export default function SandpackPreview({ files, mode }: SandpackPreviewProps) {
                 <div className="border-b px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
                   Editor
                 </div>
+                <FileTabs className="border-b" closableTabs />
                 <SandpackCodeEditor
                   className="h-full min-w-0 flex-1 [&_.cm-scroller]:overflow-auto [&_.cm-content]:min-w-max"
                   showLineNumbers

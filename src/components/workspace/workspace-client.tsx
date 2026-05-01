@@ -43,6 +43,19 @@ function normalizeFilename(value: string | undefined) {
   }
 
   const trimmed = value.trim();
+  const lowered = trimmed.toLowerCase();
+
+  if (["js", "jsx", "ts", "tsx", "javascript", "typescript"].includes(lowered)) {
+    return "/App.js";
+  }
+
+  if (["css", "scss", "sass", "less"].includes(lowered)) {
+    return "/App.css";
+  }
+
+  if (["html", "htm"].includes(lowered)) {
+    return "/App.js";
+  }
   if (trimmed.startsWith("/")) {
     return trimmed;
   }
